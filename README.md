@@ -2,6 +2,7 @@
 
 <p id="description">Fully coded in python FPS Unlocker for Roblox.</p>
 
+<h2>THIS PROJECT IS CURRENTLY IN BETA RELEASES PLEASE REPORT ISSUES!</h2>
 
 <h2>Project Screenshots:</h2>
 
