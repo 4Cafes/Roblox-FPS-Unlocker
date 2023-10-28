@@ -1,137 +1,136 @@
 import os
 import json
 import time
+import glob
+import ctypes
 
-user_home = os.path.expanduser("~")
+def set_console_title(title):
+    ctypes.windll.kernel32.SetConsoleTitleW(title)
 
-roblox_directory = "AppData\\Local\\Roblox\\Versions"
+new_title = "Cafes.lol FPS Unlocker"
+set_console_title(new_title)
 
-target_key = "DFIntTaskSchedulerTargetFps"
+class RobloxFFlags:
+    def __init__(self, version_folder):
+        self.settings_file_path = os.path.join(version_folder, "ClientSettings", "ClientAppSettings.json")
+        self.object = {}
+        self.target_fps_mod = False
+        self.alt_enter_mod = False
+        self.read_disk()
 
-new_value = None
+    def read_disk(self):
+        if os.path.isfile(self.settings_file_path):
+            with open(self.settings_file_path, "r", encoding="utf-8") as file:
+                self.object = json.load(file)
 
-def loading_screen():
-    os.system("cls")  
-    print("Loading", end="", flush=True)
-    for _ in range(3):
-        time.sleep(1)
-        print(".", end="", flush=True)
-    print()
-    os.system("cls")  
+    def write_disk(self):
+        try:
+            os.makedirs(os.path.dirname(self.settings_file_path), exist_ok=True)
+            with open(self.settings_file_path, "w", encoding="utf-8") as file:
+                json.dump(self.object, file, indent=4)
+            return True
+        except:
+            return False
 
-def loading_screen2():
-    os.system("cls")  
-    print("Finding File", end="", flush=True)
-    for _ in range(3):
-        time.sleep(1)
-        print(".", end="", flush=True)
-    print()
-    os.system("cls")  
+    def read_json_opt(self, key, data_type):
+        if key in self.object and isinstance(self.object[key], data_type):
+            return self.object[key]
+        return None
 
-def selection_menu():
-    print("\033[94mCafes.lol FPS Unlocker\033[0m")
-    print("Select an option:")
-    print("1. Run the FPS Unlocker")
-    print("2. Check Current FPS Value")
-    print("3. Credits")
-    print("4. Exit Program")
+    def update_flag(self, key, new_value):
+        current_value = self.read_json_opt(key, type(new_value))
+        if current_value != new_value:
+            if new_value is not None:
+                self.object[key] = new_value
+            else:
+                self.object.pop(key, None)
+            return True
+        return False
 
-def get_user_fps_input():
-    try:
-        fps_value = int(input("Enter the desired FPS value: "))
-        return fps_value
-    except ValueError:
-        print("Invalid input. Please enter a valid integer.")
-        return get_user_fps_input()
+    def target_fps(self):
+        return self.read_json_opt("DFIntTaskSchedulerTargetFps", int)
 
-def run_fps_unlocker(user_home, roblox_directory, target_key, new_value):
-    loading_screen2()
+    def set_target_fps(self, cap_opt):
+        if cap_opt is not None:
+            cap_opt = 5588562 if cap_opt == 0 else cap_opt
+        if self.update_flag("DFIntTaskSchedulerTargetFps", cap_opt):
+            self.target_fps_mod = True
+        return self
 
-    new_value = get_user_fps_input()
+    def alt_enter(self):
+        return self.read_json_opt("FFlagHandleAltEnterFullscreenManually", bool)
 
-    file_directory = os.path.join(user_home, roblox_directory)
+    def set_alt_enter_flag(self, alt_enter_opt):
+        if self.update_flag("FFlagHandleAltEnterFullscreenManually", alt_enter_opt):
+            self.alt_enter_mod = True
+        return self
 
-    found_json_files = False  
+    def apply(self, prompt):
+        if self.target_fps_mod or self.alt_enter_mod:
+            if prompt:
+                user_input = input("Do you want to apply the changes (Y/N)? ").strip().lower()
+                if user_input != "y":
+                    return False
+            return self.write_disk()
+        return False
 
-    for root, dirs, files in os.walk(file_directory):
-        for filename in files:
-            if filename.endswith(".json"):
-                file_path = os.path.join(root, filename)
-                try:
-                    with open(file_path, "r", encoding="utf-8") as file:
-                        data = json.load(file)
-                        if target_key in data:
-                            data[target_key] = new_value
-                            with open(file_path, "w", encoding="utf-8") as modified_file:
-                                json.dump(data, modified_file, indent=4)
-                            print("\033[92mCafes.lol FPS Unlocker was successful\033[0m")
-                            time.sleep(5)  
-                            os.system("cls")  
-                            return
-                except (json.JSONDecodeError, FileNotFoundError) as e:
-                    print(f"Error processing {file_path}: {str(e)}")
-                found_json_files = True
-
-    if not found_json_files:
-        print("No JSON files were found for modification.")
-        time.sleep(2) 
-
-def check_current_fps_value(user_home, roblox_directory, target_key):
-    loading_screen2()
-
-    # Construct the full directory path
-    file_directory = os.path.join(user_home, roblox_directory)
-
-    current_values = []
-
-    # Walk through the directory and its subdirectories
-    for root, dirs, files in os.walk(file_directory):
-        for filename in files:
-            # Check if the file is a JSON file
-            if filename.endswith(".json"):
-                file_path = os.path.join(root, filename)
-                try:
-                    with open(file_path, "r", encoding="utf-8") as file:
-                        data = json.load(file)
-                        if target_key in data:
-                            current_values.append(data[target_key])
-                except (json.JSONDecodeError, FileNotFoundError) as e:
-                    print(f"Error processing {file_path}: {str(e)}")
-
-    if not current_values:
-        print("No JSON files were found with the FPS value.")
-    else:
-        print("Current FPS Values:")
-        for value in current_values:
-            print(value)
-
-    time.sleep(5)  
-    os.system("cls")  
-    return
-
-def credits():
-    os.system("cls")  
-    print("Credits:")
-    print("This script was created by cafes.lol or 4cafes on discord.")
-    input("Press Enter to return to the main menu...")
+# Function to find the newest Roblox version folder
+def find_newest_version():
+    versions_dir = "C:\\Users\\cafes\\AppData\\Local\\Roblox\\Versions\\"
+    version_folders = glob.glob(os.path.join(versions_dir, "*"))
+    newest_version_folder = max(version_folders, key=os.path.getctime)
+    return newest_version_folder
 
 def main():
     while True:
-        loading_screen()
-        selection_menu()
+        os.system('cls' if os.name == 'nt' else 'clear')
+        print("\033[94mCafes.lol FPS Unlocker\033[0m")
+        print("1. FPS Unlocker")
+        print("2. Check Current FPS Lock")
+        print("3. Credits")
+        print("4. Exit")
+
         choice = input("Enter your choice: ")
-        
+
         if choice == "1":
-            run_fps_unlocker(user_home, roblox_directory, target_key, new_value)
+            newest_version = find_newest_version()
+            flags = RobloxFFlags(newest_version)
+            try:
+                target_fps_value = int(input("Enter the desired FPS value (0 to remove limit): "))
+                flags.set_target_fps(target_fps_value)
+                flags.set_alt_enter_flag(True)
+                print(f"Roblox version found: {os.path.basename(newest_version)}")
+
+                if flags.apply(True):
+                    print("\033[92mFPS Unlocker Successful\033[0m")
+                    time.sleep(5)
+                else:
+                    print("\033[91mFPS Not Changed\033[0m")
+                    time.sleep(2.5)
+            except ValueError:
+                print("\033[91mInvalid Input.\033[0m")
+                time.sleep(2.5)
         elif choice == "2":
-            check_current_fps_value(user_home, roblox_directory, target_key)
+            newest_version = find_newest_version()
+            flags = RobloxFFlags(newest_version)
+            target_fps = flags.target_fps()
+            if target_fps is not None:
+                print(f"Current Target FPS: {target_fps}")
+                time.sleep(5)
+            else:
+                print("No Target FPS value set.")
+                time.sleep(2.5)
         elif choice == "3":
-            credits()
+            os.system('cls' if os.name == 'nt' else 'clear')
+            print("Made by 4Cafes")
+            print("Discord.gg/jQReR3tKBj")
+            print("cafes.lol/fpsunlocker")
+            input("Press Enter to return to the main menu...")
         elif choice == "4":
-            print("Exiting program...")
+            print("Exiting...")
+            time.sleep(2)
             break
         else:
             print("Invalid choice. Please select a valid option.")
-
 if __name__ == "__main__":
     main()
