@@ -1,3 +1,5 @@
+#thanks for using my project
+
 import os
 import json
 import time
@@ -74,7 +76,6 @@ class RobloxFFlags:
             return self.write_disk()
         return False
 
-# Function to find the newest Roblox version folder
 def find_newest_version():
     versions_dir = "C:\\Users\\cafes\\AppData\\Local\\Roblox\\Versions\\"
     version_folders = glob.glob(os.path.join(versions_dir, "*"))
