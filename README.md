@@ -1,6 +1,6 @@
 <h1 align="center" id="title">Roblox FPS Unlocker</h1>
 
-<p id="description">Windows only supported but Mac is coming soon.</p>
+<p id="description">Windows only supported but Mac is out in testing on the newest release.</p>
 <p id="description">Fully coded in python FPS Unlocker for Roblox.</p>
 
 <h2>THIS PROJECT IS CURRENTLY IN BETA RELEASES PLEASE REPORT ISSUES!</h2>
