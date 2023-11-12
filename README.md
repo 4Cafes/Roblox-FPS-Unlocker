@@ -1,5 +1,5 @@
 <h1 align="center" id="title">Roblox FPS Unlocker</h1>
-
+<h1 align="center" id="title">STATUS : NOT WORKING</h1>
 <p id="description">Windows and Mac is now supported but Mac is in early testing.</p>
 <p id="description">Fully coded in python FPS Unlocker for Roblox.</p>
 
